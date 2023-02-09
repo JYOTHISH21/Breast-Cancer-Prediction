@@ -1,0 +1,97 @@
+---
+title: "LDA_PCA"
+author: "Jyothish"
+date: "1/31/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library("ggbiplot")
+library(MASS)
+library(tidyverse)
+library(caret)
+```
+
+```{r}
+d<-read.csv("C:\\Users\\jyoth\\Documents\\Code\\Breast_Cancer\\data.csv", header=TRUE)
+d<-d[,1:32]
+nrow(d)
+summary(d)
+
+set.seed(234)
+traini <- d$diagnosis %>% createDataPartition(p = 0.8, list = FALSE)
+train <- d[traini, ]
+test <- d[-traini, ]
+```
+
+```{r}
+head(d)
+
+```
+
+
+```{r}
+xtrain <- prcomp(train[,3:32], center=T, scale = T)
+sx = summary(xtrain)
+sx
+
+xtest<-prcomp(test[,3:32], center=T, scale = T)
+
+```
+
+```{r}
+plot(xtrain, type="l")
+
+```
+
+```{r}
+plot(sx$importance, type="l")
+
+```
+```{r}
+biplot(xtrain)
+```
+
+```{r}
+library(ggfortify)
+autoplot(xtrain,data = train,colour = 'diagnosis')
+```
+
+All PC Values
+```{r}
+traind <- data.frame(diagnosis=train$diagnosis, xtrain$x)
+traind<-traind[,1:31]
+
+testd <- data.frame(diagnosis=test$diagnosis, xtest$x)
+testd<-testd[,1:31]
+
+model <- lda(diagnosis~., data=traind)
+# Make predictions
+predictions <- model %>% predict(testd)
+  
+# Model accuracy
+mean(predictions$class==testd$diagnosis)
+```
+First 6 PC values
+
+```{r}
+traind <- data.frame(diagnosis=train$diagnosis, xtrain$x)
+traind<-traind[,1:7]
+
+testd <- data.frame(diagnosis=test$diagnosis, xtest$x)
+testd<-testd[,1:7]
+
+model <- lda(diagnosis~., data=traind)
+# Make predictions
+predictions <- model %>% predict(testd)
+  
+# Model accuracy
+mean(predictions$class==testd$diagnosis)
+```
+
+
