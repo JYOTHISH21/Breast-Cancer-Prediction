@@ -1,0 +1,91 @@
+---
+title: "SVM"
+author: "Jyothish"
+date: "2/13/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(caret)
+library(dplyr)
+library(e1071)
+library(purrr)
+library(corrplot)
+library(MLmetrics)
+```
+
+
+```{r}
+d <- read.csv("C:\\Users\\jyoth\\Documents\\Code\\Breast_Cancer\\data.csv")
+d<-d[1:32]
+summary(d)
+head(d)
+
+```
+```{r}
+numericVars <- which(map(d, is.numeric) == T)
+data_numVar <- d[, numericVars]
+cor_numVar <- as.matrix(cor(data_numVar, use="pairwise.complete.obs"))
+corrplot(cor_numVar, tl.col = "black", tl.cex = 0.7, type="lower")
+```
+
+```{r}
+d$diagnosis <- as.factor(d$diagnosis)
+```
+
+```{r}
+barplot(table(d$diagnosis))
+boxplot(d$radius_mean)
+boxplot(d$texture_mean)
+boxplot(d$perimeter_mean)
+boxplot(d$area_mean)
+boxplot(d$smoothness_mean)
+boxplot(d$compactness_mean)
+boxplot(d$concavity_mean)
+boxplot(d$symmetry_mean)
+boxplot(d$fractal_dimension_mean)
+```
+
+```{r}
+set.seed(243)
+traini <- d$diagnosis %>% createDataPartition(p = 0.8, list = FALSE)
+train <- d[traini, ]
+test <- d[-traini, ]
+
+```
+
+
+
+```{r}
+c1 <- svm(formula = diagnosis~., data = train, type = 'C-classification', kernel = 'linear')
+pred1 <- predict(c1,test)
+confusionMatrix(table(test$diagnosis, pred1))
+plot(pred1, test$diagnosis)
+```
+
+```{r}
+F1_Score(pred1, test$diagnosis)
+Recall(pred1, test$diagnosis)
+Precision(pred1, test$diagnosis)
+```
+
+```{r}
+c2 <- svm(formula = diagnosis~., data = train, type = 'C-classification', kernel = 'radial')
+pred2 <- predict(c2,test)
+confusionMatrix(table(test$diagnosis, pred2))
+plot(pred2, test$diagnosis)
+```
+
+```{r}
+F1_Score(pred2, test$diagnosis)
+Recall(pred2, test$diagnosis)
+Precision(pred2, test$diagnosis)
+```
+
+
+
+
